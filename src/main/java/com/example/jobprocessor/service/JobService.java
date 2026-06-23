@@ -5,6 +5,7 @@ import com.example.jobprocessor.entity.Job;
 import com.example.jobprocessor.repository.JobRepository;
 import org.springframework.stereotype.Service;
 import com.example.jobprocessor.entity.JobStatus;
+import com.example.jobprocessor.entity.Priority;
 
 @Service
 public class JobService {
@@ -24,7 +25,11 @@ public class JobService {
         Job job = new Job();
 
         job.setJobType(request.getJobType());
-        job.setPriority(request.getPriority());
+        job.setPriority(
+     Priority.valueOf(
+        request.getPriority().toUpperCase()
+    )
+    );
         job.setStatus(JobStatus.QUEUED);
 
         return jobRepository.save(job);

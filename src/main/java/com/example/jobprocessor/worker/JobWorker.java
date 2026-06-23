@@ -20,7 +20,7 @@ public class JobWorker {
     @Scheduled(fixedRate = 10000)
     public void processJobs() {
 
-        List<Job> jobs = jobRepository.findAll();
+       List<Job> jobs = jobRepository.findByStatus(JobStatus.QUEUED);
 
         for (Job job : jobs) {
 

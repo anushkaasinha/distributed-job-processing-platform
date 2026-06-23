@@ -17,7 +17,8 @@ public class Job {
     private String jobType;
     @Enumerated(EnumType.STRING)
       private JobStatus status;
-    private String priority;
+    @Enumerated(EnumType.STRING)
+   private Priority priority;
 
     public Job() {
     }
@@ -41,11 +42,11 @@ public class Job {
 public void setStatus(JobStatus status) {
     this.status = status;
 }
-    public String getPriority() {
-        return priority;
-    }
+  public Priority getPriority() {
+    return priority;
+}
 
-    public void setPriority(String priority) {
-        this.priority = priority;
-    }
+public void setPriority(Priority priority) {
+    this.priority = priority;
+}
 }
