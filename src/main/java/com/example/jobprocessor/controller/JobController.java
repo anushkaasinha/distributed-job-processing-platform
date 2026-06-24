@@ -5,6 +5,7 @@ import com.example.jobprocessor.entity.Job;
 import com.example.jobprocessor.service.JobService;
 import java.util.List;
 import org.springframework.web.bind.annotation.*;
+import com.example.jobprocessor.dto.JobStatsResponse;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -23,5 +24,9 @@ public class JobController {
     @GetMapping
 public List<Job> getAllJobs() {
     return jobService.getAllJobs();
+}
+@GetMapping("/stats")
+public JobStatsResponse getStats() {
+    return jobService.getStats();
 }
 }

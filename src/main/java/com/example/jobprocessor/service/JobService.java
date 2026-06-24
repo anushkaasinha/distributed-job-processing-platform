@@ -6,12 +6,13 @@ import com.example.jobprocessor.repository.JobRepository;
 import org.springframework.stereotype.Service;
 import com.example.jobprocessor.entity.JobStatus;
 import com.example.jobprocessor.entity.Priority;
+import com.example.jobprocessor.dto.JobStatsResponse;
 
 @Service
 public class JobService {
 
     private final JobRepository jobRepository;
-
+   
     public JobService(JobRepository jobRepository) {
         this.jobRepository = jobRepository;
     }
@@ -31,7 +32,31 @@ public class JobService {
     )
     );
         job.setStatus(JobStatus.QUEUED);
+         job.setRetryCount(0);
+    job.setMaxRetries(3);
+
 
         return jobRepository.save(job);
     }
+    public JobStatsResponse getStats() {
+
+    long queued =
+            jobRepository.countByStatus(JobStatus.QUEUED);
+
+    long processing =
+            jobRepository.countByStatus(JobStatus.PROCESSING);
+
+    long completed =
+            jobRepository.countByStatus(JobStatus.COMPLETED);
+
+    long failed =
+            jobRepository.countByStatus(JobStatus.FAILED);
+
+    return new JobStatsResponse(
+            queued,
+            processing,
+            completed,
+            failed
+    );
+}
 }

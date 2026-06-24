@@ -13,6 +13,8 @@ public class Job {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Integer retryCount;
+    private Integer maxRetries;
 
     private String jobType;
     @Enumerated(EnumType.STRING)
@@ -48,5 +50,20 @@ public void setStatus(JobStatus status) {
 
 public void setPriority(Priority priority) {
     this.priority = priority;
+}
+public Integer getRetryCount() {
+    return retryCount;
+}
+
+public void setRetryCount(Integer retryCount) {
+    this.retryCount = retryCount;
+}
+
+public Integer getMaxRetries() {
+    return maxRetries;
+}
+
+public void setMaxRetries(Integer maxRetries) {
+    this.maxRetries = maxRetries;
 }
 }

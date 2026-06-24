@@ -7,11 +7,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Random;
 
 @Component
 public class JobWorker {
 
     private final JobRepository jobRepository;
+    private final Random random = new Random();
 
     public JobWorker(JobRepository jobRepository) {
         this.jobRepository = jobRepository;
@@ -20,27 +22,56 @@ public class JobWorker {
     @Scheduled(fixedRate = 10000)
     public void processJobs() {
 
-       List<Job> jobs = jobRepository.findByStatus(JobStatus.QUEUED);
+        List<Job> jobs = jobRepository.findByStatus(JobStatus.QUEUED);
 
         for (Job job : jobs) {
 
-            if (job.getStatus() == JobStatus.QUEUED) {
+            System.out.println("Processing Job: " + job.getId());
 
-                System.out.println("Processing Job: " + job.getId());
+            job.setStatus(JobStatus.PROCESSING);
+            jobRepository.save(job);
 
-                job.setStatus(JobStatus.PROCESSING);
-                jobRepository.save(job);
+            try {
+                Thread.sleep(3000);
 
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                boolean failed = random.nextBoolean();
+
+                if (failed) {
+
+                    job.setRetryCount(job.getRetryCount() + 1);
+
+                    if (job.getRetryCount() >= job.getMaxRetries()) {
+
+                        job.setStatus(JobStatus.FAILED);
+
+                        System.out.println(
+                                "Job Failed Permanently: " + job.getId()
+                        );
+
+                    } else {
+
+                        job.setStatus(JobStatus.QUEUED);
+
+                        System.out.println(
+                                "Retrying Job: " + job.getId()
+                                        + " Retry Count: "
+                                        + job.getRetryCount()
+                        );
+                    }
+
+                } else {
+
+                    job.setStatus(JobStatus.COMPLETED);
+
+                    System.out.println(
+                            "Completed Job: " + job.getId()
+                    );
                 }
 
-                job.setStatus(JobStatus.COMPLETED);
                 jobRepository.save(job);
 
-                System.out.println("Completed Job: " + job.getId());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
