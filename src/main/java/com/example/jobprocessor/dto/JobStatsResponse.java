@@ -6,15 +6,23 @@ public class JobStatsResponse {
     private long processing;
     private long completed;
     private long failed;
+    private double successRate;
+    private long averageProcessingTimeMs;
 
-    public JobStatsResponse(long queued,
-                            long processing,
-                            long completed,
-                            long failed) {
+    public JobStatsResponse(
+            long queued,
+            long processing,
+            long completed,
+            long failed,
+            double successRate,
+            long averageProcessingTimeMs) {
+
         this.queued = queued;
         this.processing = processing;
         this.completed = completed;
         this.failed = failed;
+        this.successRate = successRate;
+        this.averageProcessingTimeMs = averageProcessingTimeMs;
     }
 
     public long getQueued() {
@@ -31,5 +39,13 @@ public class JobStatsResponse {
 
     public long getFailed() {
         return failed;
+    }
+
+    public double getSuccessRate() {
+        return successRate;
+    }
+
+    public long getAverageProcessingTimeMs() {
+        return averageProcessingTimeMs;
     }
 }
