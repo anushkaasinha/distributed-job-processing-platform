@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import com.example.jobprocessor.entity.JobStatus;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -15,6 +16,9 @@ public class Job {
     private Long id;
     private Integer retryCount;
     private Integer maxRetries;
+    private LocalDateTime createdAt;
+    private LocalDateTime startedAt;
+    private LocalDateTime completedAt;
 
     private String jobType;
     @Enumerated(EnumType.STRING)
