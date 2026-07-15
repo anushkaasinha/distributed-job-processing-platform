@@ -13,6 +13,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByStatusOrderByPriorityAsc(
             JobStatus status
     );
+    
 
     long countByStatus(JobStatus status);
 }

@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: job_processor
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  jobprocessor:
+    build: .
+    container_name: jobprocessor
+
+    depends_on:
+      - mysql
+      - rabbitmq
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/job_processor
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql-data:
