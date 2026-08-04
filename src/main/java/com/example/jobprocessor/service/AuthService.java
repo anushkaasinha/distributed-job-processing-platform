@@ -9,6 +9,7 @@ import com.example.jobprocessor.exception.ResourceNotFoundException;
 import com.example.jobprocessor.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.jobprocessor.exception.InvalidCredentialsException;
 
 @Service
 public class AuthService {
@@ -51,7 +52,7 @@ public class AuthService {
                 request.getPassword(),
                 user.getPassword())) {
 
-            throw new RuntimeException("Invalid password");
+            throw new InvalidCredentialsException("Invalid username or password");
         }
 
         String token = jwtService.generateToken(user.getUsername());
