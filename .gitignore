@@ -31,3 +31,16 @@ build/
 
 ### VS Code ###
 .vscode/
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# IDE and workspace files
+*.code-workspace
+
+# OS files
+.DS_Store

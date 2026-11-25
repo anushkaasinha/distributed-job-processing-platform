@@ -4,12 +4,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableScheduling
 @SpringBootApplication
-
 public class JobprocessorApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(JobprocessorApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(
+                JobprocessorApplication.class,
+                args
+        );
+    }
 }

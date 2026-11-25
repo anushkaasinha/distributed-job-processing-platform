@@ -1,3 +1,4 @@
+
 package com.example.jobprocessor.service;
 
 import com.example.jobprocessor.config.RabbitMQConfig;
@@ -6,9 +7,13 @@ import com.example.jobprocessor.dto.JobStatsResponse;
 import com.example.jobprocessor.entity.Job;
 import com.example.jobprocessor.entity.JobStatus;
 import com.example.jobprocessor.entity.Priority;
+import com.example.jobprocessor.outbox.OutboxEvent;
+import com.example.jobprocessor.outbox.OutboxRepository;
 import com.example.jobprocessor.repository.JobRepository;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -19,12 +24,18 @@ import java.util.Random;
 public class JobService {
 
     private final JobRepository jobRepository;
+    private final OutboxRepository outboxRepository;
     private final RabbitTemplate rabbitTemplate;
+
     private final Random random = new Random();
 
-    public JobService(JobRepository jobRepository,
-                      RabbitTemplate rabbitTemplate) {
+    public JobService(
+            JobRepository jobRepository,
+            OutboxRepository outboxRepository,
+            RabbitTemplate rabbitTemplate) {
+
         this.jobRepository = jobRepository;
+        this.outboxRepository = outboxRepository;
         this.rabbitTemplate = rabbitTemplate;
     }
 
@@ -32,8 +43,11 @@ public class JobService {
         return jobRepository.findAll();
     }
 
+    // Transactional Outbox implementation
+    @Transactional
     public Job createJob(CreateJobRequest request) {
 
+        // 1. Create a new job
         Job job = new Job();
 
         job.setCreatedAt(LocalDateTime.now());
@@ -49,13 +63,21 @@ public class JobService {
         job.setRetryCount(0);
         job.setMaxRetries(3);
 
+        // 2. Save job in MySQL
         Job savedJob = jobRepository.save(job);
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.JOB_QUEUE,
-                savedJob.getId()
-        );
+        // 3. Create an outbox event
+        OutboxEvent event = new OutboxEvent();
 
+        event.setJobId(savedJob.getId());
+        event.setEventType("JOB_CREATED");
+        event.setPublished(false);
+        event.setCreatedAt(LocalDateTime.now());
+
+        // 4. Save outbox event in MySQL
+        outboxRepository.save(event);
+
+        // 5. Return saved job
         return savedJob;
     }
 
@@ -65,13 +87,13 @@ public class JobService {
                 .orElseThrow(() ->
                         new RuntimeException("Job not found"));
 
-       System.out.println(
-        Thread.currentThread().getName()
-                + " processing "
-                + job.getPriority()
-                + " Priority Job "
-                + job.getId()
-);
+        System.out.println(
+                Thread.currentThread().getName()
+                        + " processing "
+                        + job.getPriority()
+                        + " Priority Job "
+                        + job.getId()
+        );
 
         job.setStartedAt(LocalDateTime.now());
         job.setStatus(JobStatus.PROCESSING);
