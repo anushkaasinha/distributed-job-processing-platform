@@ -81,11 +81,30 @@ public class JobService {
         return savedJob;
     }
 
+    // Process job with consumer idempotency
     public void processJob(Long jobId) {
 
+        // 1. Atomically claim the job
+        LocalDateTime startedAt = LocalDateTime.now();
+
+        int updatedRows = jobRepository.claimJob(jobId, startedAt);
+
+        // 2. If no row was updated, another consumer
+        // has already claimed or completed this job
+        if (updatedRows == 0) {
+
+            System.out.println(
+                    "Job " + jobId
+                            + " is already claimed or processed. Skipping."
+            );
+
+            return;
+        }
+
+        // 3. Fetch the claimed job
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() ->
-                        new RuntimeException("Job not found"));
+                        new RuntimeException("Job not found: " + jobId));
 
         System.out.println(
                 Thread.currentThread().getName()
@@ -94,11 +113,6 @@ public class JobService {
                         + " Priority Job "
                         + job.getId()
         );
-
-        job.setStartedAt(LocalDateTime.now());
-        job.setStatus(JobStatus.PROCESSING);
-
-        jobRepository.save(job);
 
         try {
 
